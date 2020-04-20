@@ -1,4 +1,4 @@
-from itertools import product, permutations
+from itertools import product
 
 
 def get_order(dim, edges, numbers):
@@ -100,58 +100,18 @@ def calculate_term(dim, printing=False):
     return len(orients)
 
 
-def calculate_term_old(dim, printing=False):
-    """This is slower than the above version, and is only used for testing."""
-    # generate the edges of a dim-dimensional cube
-    edges = []
-    if dim >= 1:
-        edges = [(0, 1)]
-    for d in range(1, dim):
-        e = [i for i in edges]
-        e2 = [tuple(j + 2**d for j in i) for i in edges]
-        e3 = [(i, i+2**d) for i in range(2**d)]
-        edges = e + e2 + e3
-
-    # generate the hyperoctahedral group
-    transforms = generate_hyperoctahedral_group(dim, edges)
-
-    # Try all numberings of vertices
-    orients = []
-    for n in permutations(range(2**dim)):
-        o = get_order(dim, edges, n)
-        for p in transforms:
-            o2 = get_order(dim, edges, [n[i] for i in p])
-            if o2 > o:
-                break
-            if o2 in orients:
-                break
-        else:
-            orients.append(o)
-            if printing:
-                print(o, len(orients))
-    return len(orients)
-
-
 # Test the code
-data = {}
-for i in range(1, 4):
-    data[i] = {"new": calculate_term(i),
-               "old": calculate_term_old(i)}
-
 print("Testing calculate_term(1)")
-assert data[1]["new"] == 1
+assert calculate_term(1) == 1
 print("PASS")
 
 print("Testing calculate_term(2)")
-assert data[2]["new"] == 3
+assert calculate_term(2) == 3
 print("PASS")
 
-for i in range(1, 4):
-    print("Testing calculate_term(" + str(i) + ")"
-          " == calculate_term_old(" + str(i) + ")")
-    assert data[i]["new"] == data[i]["old"]
-    assert data[i]["new"] == data[i]["old"]
-    print("PASS")
+print("Testing calculate_term(2)")
+assert calculate_term(3) == 54
+print("PASS")
 # End testing
 
 with open("b334248.txt", "w") as f:
