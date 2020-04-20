@@ -2,24 +2,37 @@
 from itertools import product
 
 
-def has_cycles(dim, orient, edges):
-    for i in range(2**dim):
+def has_cycles(edges, orient):
+    vertices = 0
+    for o, e in zip(orient, edges):
+        vertices = max(vertices, e[0]+1, e[1]+1)
+    for i in range(vertices):
         after = [i]
         p = 0
         while p != len(after):
             p = len(after)
-            for (a, b), d in zip(edges, orient):
-                if d and a in after:
-                    if b == i:
+            for o, e in zip(orient, edges):
+                if o and e[0] in after:
+                    if e[1] == i:
                         return True
-                    if b not in after:
-                        after.append(b)
-                if not d and b in after:
-                    if a == i:
+                    if e[1] not in after:
+                        after.append(e[1])
+                if not o and e[1] in after:
+                    if e[0] == i:
                         return True
-                    if a not in after:
-                        after.append(a)
+                    if e[0] not in after:
+                        after.append(e[0])
     return False
+
+
+def acyclic_permutations(edges, done=[]):
+    if len(done) == len(edges):
+        return 1
+    out = 0
+    for i in [True, False]:
+        if not has_cycles(edges, done + [i]):
+            out += acyclic_permutations(edges, done + [i])
+    return out
 
 
 def calculate_term(dim):
@@ -33,20 +46,15 @@ def calculate_term(dim):
         e3 = [(i, i+2**d) for i in range(2**d)]
         edges = e + e2 + e3
 
-    # Try all numberings of vertices
-    edge_count = dim * 2 ** (dim-1)
-    assert len(edges) == edge_count
-    count = 0
-    for n in product([True, False], repeat=edge_count):
-        if not has_cycles(dim, n, edges):
-            count += 1
-    return count
+    return acyclic_permutations(edges)
 
 
 # Test known terms of sequence
+assert has_cycles([(0,1),(2,3),(0,2),(1,3)], [True, False, False, True])
 assert calculate_term(1) == 2
 assert calculate_term(2) == 14
 assert calculate_term(3) == 1862
+# End test
 
 with open("b334247.txt", "w") as f:
     pass
