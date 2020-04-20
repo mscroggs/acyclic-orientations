@@ -1,4 +1,5 @@
-from itertools import product, permutations
+# TODO: change this to evaluate chromatic polynomials at -1
+from itertools import product
 
 
 def has_cycles(dim, orient, edges):
@@ -7,7 +8,7 @@ def has_cycles(dim, orient, edges):
         p = 0
         while p != len(after):
             p = len(after)
-            for (a,b), d in zip(edges, orient):
+            for (a, b), d in zip(edges, orient):
                 if d and a in after:
                     if b == i:
                         return True
@@ -47,6 +48,5 @@ assert calculate_term(1) == 2
 assert calculate_term(2) == 14
 assert calculate_term(3) == 1862
 
-for i in range(1,8):
+for i in range(1, 4):
     print(i, calculate_term(i))
-
