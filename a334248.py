@@ -59,6 +59,16 @@ def generate_edge_maps(transform, edges):
 
 
 def unique_acyclic_permutations(edges, edge_t, printing=False, done=[]):
+    if len(done) > 0:
+        if not done[0]:
+            # If done starts False, then it can be made larger by
+            # reflecting so it starts True
+            return 0
+    if len(done) > 2:
+        if done[0] and done[1] and not done[2]:
+            # If done starts True True False, it can be made larger by
+            # reflecting so it starts True True True
+            return 0
     if len(done) == len(edges):
         o = "".join(["1" if i else "0" for i in done])
         for p in edge_t:
@@ -93,23 +103,6 @@ def calculate_term(dim, printing=False):
     edge_transforms = generate_edge_maps(transforms, edges)
 
     return unique_acyclic_permutations(edges, edge_transforms, printing)
-
-    # Try all numberings of vertices
-    orients = []
-    edge_count = dim * 2 ** (dim-1)
-    assert len(edges) == edge_count
-    for n in product([True, False], repeat=edge_count):
-        if not has_cycles(edges, n):
-            o = "".join(["1" if i else "0" for i in n])
-            for p in edge_transforms:
-                o2 = "".join(["1" if j == n[i] else "0" for i, j in p])
-                if o2 in orients:
-                    break
-            else:
-                orients.append(o)
-                if printing:
-                    print(o, len(orients))
-    return len(orients)
 
 
 # Test the code
