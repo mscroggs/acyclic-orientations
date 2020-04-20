@@ -17,7 +17,7 @@ def has_cycles(dim, orient, edges):
         p = 0
         while p != len(after):
             p = len(after)
-            for (a,b), d in zip(edges, orient):
+            for (a, b), d in zip(edges, orient):
                 if d and a in after:
                     if b == i:
                         return True
@@ -32,6 +32,7 @@ def has_cycles(dim, orient, edges):
 
 
 def generate_hyperoctahedral_group(dim, edges, done=[]):
+    """Generates all the permutations of the dim-dimensional cube."""
     if len(done) == 2**dim:
         return [done]
     elements = []
@@ -50,6 +51,7 @@ def generate_hyperoctahedral_group(dim, edges, done=[]):
 
 
 def generate_edge_maps(transform, edges):
+    """Generates the effect of each permutation on the edges."""
     out = []
     for t in transform:
         new_t = []
@@ -62,7 +64,8 @@ def generate_edge_maps(transform, edges):
         out.append(new_t)
     return out
 
-def references(dim, printing=False):
+
+def calculate_term(dim, printing=False):
     # generate the edges of a dim-dimensional cube
     edges = []
     if dim >= 1:
@@ -79,48 +82,26 @@ def references(dim, printing=False):
 
     # Try all numberings of vertices
     orients = []
-    torients = []
     edge_count = dim * 2 ** (dim-1)
     assert len(edges) == edge_count
     for n in product([True, False], repeat=edge_count):
         if not has_cycles(dim, n, edges):
             o = "".join(["1" if i else "0" for i in n])
-            if o not in torients:
-                torients.append(o)
             for p in edge_transforms:
-                o2 = "".join(["1" if j == n[i] else "0" for i,j in p])
+                o2 = "".join(["1" if j == n[i] else "0" for i, j in p])
+                if o2 > o:
+                    break
                 if o2 in orients:
                     break
             else:
                 orients.append(o)
                 if printing:
                     print(o, len(orients))
-    return len(orients), len(torients)
+    return len(orients)
 
 
-def treferences(dim, printing=False):
-    # generate the edges of a dim-dimensional cube
-    edges = []
-    if dim >= 1:
-        edges = [(0, 1)]
-    for d in range(1, dim):
-        e = [i for i in edges]
-        e2 = [tuple(j + 2**d for j in i) for i in edges]
-        e3 = [(i, i+2**d) for i in range(2**d)]
-        edges = e + e2 + e3
-
-    # Try all numberings of vertices
-    torients = []
-    edge_count = dim * 2 ** (dim-1)
-    assert len(edges) == edge_count
-    count = 0
-    for n in product([True, False], repeat=edge_count):
-        if not has_cycles(dim, n, edges):
-            count += 1
-    return count
-
-
-def references_old(dim, printing=False):
+def calculate_term_old(dim, printing=False):
+    """This is slower than the above version, and is only used for testing."""
     # generate the edges of a dim-dimensional cube
     edges = []
     if dim >= 1:
@@ -133,61 +114,51 @@ def references_old(dim, printing=False):
 
     # generate the hyperoctahedral group
     transforms = generate_hyperoctahedral_group(dim, edges)
-    edge_transforms = generate_edge_maps(transforms, edges)
 
     # Try all numberings of vertices
     orients = []
-    torients = []
     for n in permutations(range(2**dim)):
         o = get_order(dim, edges, n)
-        if o not in torients:
-            torients.append(o)
         for p in transforms:
-            if get_order(dim, edges, [p[i] for i in n]) in orients:
+            o2 = get_order(dim, edges, [n[i] for i in p])
+            if o2 > o:
+                break
+            if o2 in orients:
                 break
         else:
             orients.append(o)
             if printing:
-                print(n, len(orients))
-    return len(orients), len(torients)
+                print(o, len(orients))
+    return len(orients)
 
-
-for i in range(1,8):
-    print(i, treferences(i))
 
 # Test the code
 data = {}
-for i in range(1,4):
-    data[i] = {"new":references(i),
-               "old":references_old(i)}
+for i in range(1, 4):
+    data[i] = {"new": calculate_term(i),
+               "old": calculate_term_old(i)}
 
-print("Testing references(1)")
-assert data[1]["new"][0] == 1
+print("Testing calculate_term(1)")
+assert data[1]["new"] == 1
 print("PASS")
 
-print("Testing references(2)")
-assert data[2]["new"][0] == 3
+print("Testing calculate_term(2)")
+assert data[2]["new"] == 3
 print("PASS")
 
-print("Testing references(3)")
-assert data[3]["new"][1] == 1862
-print("PASS")
-
-for i in range(1,4):
-    print("Testing references("+str(i)+") == references_old("+str(i)+")")
-    assert data[i]["new"][0] == data[1]["old"][0]
-    assert data[i]["new"][1] == data[1]["old"][1]
+for i in range(1, 4):
+    print("Testing calculate_term(" + str(i) + ")"
+          " == calculate_term_old(" + str(i) + ")")
+    assert data[i]["new"] == data[i]["old"]
+    assert data[i]["new"] == data[i]["old"]
     print("PASS")
+# End testing
 
-with open("s1", "w") as f:
+with open("b334248.txt", "w") as f:
     pass
-with open("s2", "w") as f:
-    pass
 
-for i in range(1,5):
-    a,b = references(i, True)
-    with open("s1", "a") as f:
-        f.write(str(a)+"\n")
-    with open("s2", "a") as f:
-        f.write(str(b)+"\n")
-
+for n in range(1, 5):
+    a_n = calculate_term(n, True)
+    with open("b334248.txt", "a") as f:
+        f.write(str(n) + " " + str(a_n) + "\n")
+    print(n, a_n)
