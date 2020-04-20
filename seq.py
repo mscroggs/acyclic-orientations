@@ -12,14 +12,20 @@ def get_order(dim, edges, numbers):
 
 
 def generate_hyperoctahedral_group(dim, edges, done=[]):
+    if len(done) == 2**dim:
+        return [done]
     elements = []
-    for p in permutations(range(2**dim)):
-        ren_edges = [tuple(p[j] for j in i) for i in edges]
-        for i, j in ren_edges:
-            if (min(i, j), max(i, j)) not in edges:
-                break
-        else:
-            elements.append(p)
+    for i in range(2**dim):
+        if i not in done:
+            numbers = done + [i]
+            for e in edges:
+                if max(e) < len(numbers):
+                    vertices = [numbers[e[0]], numbers[e[1]]]
+                    new_e = (min(vertices), max(vertices))
+                    if new_e not in edges:
+                        break
+            else:
+                elements += generate_hyperoctahedral_group(dim, edges, numbers)
     return elements
 
 
@@ -49,8 +55,18 @@ def references(dim):
                 break
         else:
             orients.append(o)
+            print(n, len(orients))
     return len(orients), len(torients)
 
 
+with open("s1", "w") as f:
+    pass
+with open("s2", "w") as f:
+    pass
+
 for i in range(5):
-    print(references(i))
+    a,b = references(i)
+    with open("s1", "a") as f:
+        f.write(str(a)+"\n")
+    with open("s2", "a") as f:
+        f.write(str(b)+"\n")
