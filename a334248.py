@@ -122,7 +122,7 @@ print("PASS")
 with open("b334248.txt", "w") as f:
     pass
 
-for n in range(1, 5):
+for n in range(5):
     a_n = calculate_term(n, True)
     with open("b334248.txt", "a") as f:
         f.write(str(n) + " " + str(a_n) + "\n")

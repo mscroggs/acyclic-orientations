@@ -58,7 +58,7 @@ assert calculate_term(3) == 1862
 with open("b334247.txt", "w") as f:
     pass
 
-for n in range(1, 4):
+for n in range(4):
     a_n = calculate_term(n)
     with open("b334247.txt", "a") as f:
         f.write(str(n) + " " + str(a_n) + "\n")
