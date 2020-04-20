@@ -58,20 +58,15 @@ def generate_edge_maps(transform, edges):
     return out
 
 
-used = []
-
-
 def unique_acyclic_permutations(edges, edge_t, printing=False, done=[]):
-    global used
     if len(done) == len(edges):
         o = "".join(["1" if i else "0" for i in done])
         for p in edge_t:
             o2 = "".join(["1" if j == done[i] else "0" for i, j in p])
-            if o2 in used:
+            if o2 > o:
                 return 0
-        used.append(o)
         if printing:
-            print(o, len(used))
+            print(o)
         return 1
 
     out = 0
@@ -83,8 +78,6 @@ def unique_acyclic_permutations(edges, edge_t, printing=False, done=[]):
 
 
 def calculate_term(dim, printing=False):
-    global used
-    used = []
     # generate the edges of a dim-dimensional cube
     edges = []
     if dim >= 1:
