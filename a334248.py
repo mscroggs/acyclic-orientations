@@ -1,33 +1,26 @@
 from itertools import product
 
 
-def get_order(dim, edges, numbers):
-    out = ""
-    for e in edges:
-        if numbers[e[0]] > numbers[e[1]]:
-            out += "0"
-        else:
-            out += "1"
-    return out
-
-
-def has_cycles(dim, orient, edges):
-    for i in range(2**dim):
+def has_cycles(edges, orient):
+    vertices = 0
+    for o, e in zip(orient, edges):
+        vertices = max(vertices, e[0]+1, e[1]+1)
+    for i in range(vertices):
         after = [i]
         p = 0
         while p != len(after):
             p = len(after)
-            for (a, b), d in zip(edges, orient):
-                if d and a in after:
-                    if b == i:
+            for o, e in zip(orient, edges):
+                if o and e[0] in after:
+                    if e[1] == i:
                         return True
-                    if b not in after:
-                        after.append(b)
-                if not d and b in after:
-                    if a == i:
+                    if e[1] not in after:
+                        after.append(e[1])
+                if not o and e[1] in after:
+                    if e[0] == i:
                         return True
-                    if a not in after:
-                        after.append(a)
+                    if e[0] not in after:
+                        after.append(e[0])
     return False
 
 
@@ -65,7 +58,33 @@ def generate_edge_maps(transform, edges):
     return out
 
 
+used = []
+
+
+def unique_acyclic_permutations(edges, edge_t, printing=False, done=[]):
+    global used
+    if len(done) == len(edges):
+        o = "".join(["1" if i else "0" for i in done])
+        for p in edge_t:
+            o2 = "".join(["1" if j == done[i] else "0" for i, j in p])
+            if o2 in used:
+                return 0
+        used.append(o)
+        if printing:
+            print(o, len(used))
+        return 1
+
+    out = 0
+    for i in [True, False]:
+        if not has_cycles(edges, done + [i]):
+            out += unique_acyclic_permutations(edges, edge_t, printing,
+                                               done + [i])
+    return out
+
+
 def calculate_term(dim, printing=False):
+    global used
+    used = []
     # generate the edges of a dim-dimensional cube
     edges = []
     if dim >= 1:
@@ -80,17 +99,17 @@ def calculate_term(dim, printing=False):
     transforms = generate_hyperoctahedral_group(dim, edges)
     edge_transforms = generate_edge_maps(transforms, edges)
 
+    return unique_acyclic_permutations(edges, edge_transforms, printing)
+
     # Try all numberings of vertices
     orients = []
     edge_count = dim * 2 ** (dim-1)
     assert len(edges) == edge_count
     for n in product([True, False], repeat=edge_count):
-        if not has_cycles(dim, n, edges):
+        if not has_cycles(edges, n):
             o = "".join(["1" if i else "0" for i in n])
             for p in edge_transforms:
                 o2 = "".join(["1" if j == n[i] else "0" for i, j in p])
-                if o2 > o:
-                    break
                 if o2 in orients:
                     break
             else:
@@ -102,7 +121,7 @@ def calculate_term(dim, printing=False):
 
 # Test the code
 print("Testing calculate_term(1)")
-assert calculate_term(1) == 1
+assert calculate_term(1, True) == 1
 print("PASS")
 
 print("Testing calculate_term(2)")

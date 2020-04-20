@@ -1,5 +1,4 @@
 # TODO: change this to evaluate chromatic polynomials at -1
-from itertools import product
 
 
 def has_cycles(edges, orient):
@@ -50,7 +49,7 @@ def calculate_term(dim):
 
 
 # Test known terms of sequence
-assert has_cycles([(0,1),(2,3),(0,2),(1,3)], [True, False, False, True])
+assert has_cycles([(0, 1), (2, 3), (0, 2), (1, 3)], [True, False, False, True])
 assert calculate_term(1) == 2
 assert calculate_term(2) == 14
 assert calculate_term(3) == 1862
