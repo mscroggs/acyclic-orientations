@@ -48,5 +48,11 @@ assert calculate_term(1) == 2
 assert calculate_term(2) == 14
 assert calculate_term(3) == 1862
 
-for i in range(1, 4):
-    print(i, calculate_term(i))
+with open("b334247.txt", "w") as f:
+    pass
+
+for n in range(1, 4):
+    a_n = calculate_term(n)
+    with open("b334247.txt", "a") as f:
+        f.write(str(n) + " " + str(a_n) + "\n")
+    print(n, a_n)
