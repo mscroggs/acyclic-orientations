@@ -117,11 +117,11 @@ def calculate_term(n, printing=False):
     return unique_acyclic_permutations(edges, edge_transforms, printing)
 
 
-with open("b3343--.txt", "w") as f:
+with open("b334306.txt", "w") as f:
     pass
 
 for n in range(5):
     a_n = calculate_term(n, True==0)
-    with open("b3343--.txt", "a") as f:
+    with open("b334306.txt", "a") as f:
         f.write(str(n) + " " + str(a_n) + "\n")
     print(n, a_n)
