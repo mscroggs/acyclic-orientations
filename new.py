@@ -23,12 +23,11 @@ def has_cycles(edges, orient):
     return False
 
 
-def generate_hyperoctahedral_group(dim, edges, done=[]):
-    """Generates all the permutations of the dim-dimensional cube."""
-    if len(done) == 2**dim:
+def generate_hyperoctahedral_group(vcount, edges, done=[]):
+    if len(done) == vcount:
         return [done]
     elements = []
-    for i in range(2**dim):
+    for i in range(vcount):
         if i not in done:
             numbers = done + [i]
             for e in edges:
@@ -38,7 +37,7 @@ def generate_hyperoctahedral_group(dim, edges, done=[]):
                     if new_e not in edges:
                         break
             else:
-                elements += generate_hyperoctahedral_group(dim, edges, numbers)
+                elements += generate_hyperoctahedral_group(vcount, edges, numbers)
     return elements
 
 
@@ -83,54 +82,46 @@ def unique_acyclic_permutations(edges, edge_t, printing=False, done=[]):
     return out
 
 
-def calculate_term(dim, printing=False):
-    # generate the edges of a dim-dimensional cube
-    if dim <= 1:
-        return 1
-    topology = {}
-    for d in range(dim+1):
-        for n in range(d-1,-1,-1):
-            new_n = [i for i in topology[n]]
-            new_n += [tuple(j+2**(d-1) for j in i) for i in topology[n]]
-            if n > 0:
-                for e in topology[n-1]:
-                    new_n.append(tuple(list(e) + [i+2**(d-1) for i in e]))
-            topology[n] = new_n
-        topology[d] = [tuple(range(2**d))]
+def calculate_term(n, printing=False):
+    if n < 3:
+        return None
 
+    edges = [(0,n-1), (n,2*n-1)]
+    for i in range(n-1):
+        edges.append((i, i+1))
+        edges.append((i+n, i+1+n))
+    for i in range(n):
+        edges.append((i, i+n))
+
+    faces = [tuple(range(n)), tuple(range(n,2*n))]
+    for i in range(n):
+        faces.append((i, (i+1)%n, i+n, (i+1)%n + n))
+
+    print(edges)
+    # generate the hyperoctahedral group
+    transforms = generate_hyperoctahedral_group(2*n, edges)
+
+    # Remake edges adding in diagonals on faces
     edges = []
-    for e in topology[dim-1]:
+    for e in faces:
         for i in combinations(e, 2):
+            i = (min(i), max(i))
             if i not in edges:
                 edges.append(i)
     edges.sort()
 
-    # generate the hyperoctahedral group
-    transforms = generate_hyperoctahedral_group(dim, topology[1])
+    print(edges)
+
     edge_transforms = generate_edge_maps(transforms, edges)
 
     return unique_acyclic_permutations(edges, edge_transforms, printing)
 
 
-# Test the code
-print("Testing calculate_term(1)")
-assert calculate_term(1) == 1
-print("PASS")
-
-print("Testing calculate_term(2)")
-assert calculate_term(2) == 3
-print("PASS")
-
-print("Testing calculate_term(3)")
-#assert calculate_term(3) == 94
-print("PASS")
-# End testing
-
-with open("b334304.txt", "w") as f:
+with open("b3343--.txt", "w") as f:
     pass
 
 for n in range(5):
-    a_n = calculate_term(n, True)
-    with open("b334304.txt", "a") as f:
+    a_n = calculate_term(n, True==0)
+    with open("b3343--.txt", "a") as f:
         f.write(str(n) + " " + str(a_n) + "\n")
     print(n, a_n)
