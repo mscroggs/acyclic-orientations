@@ -58,7 +58,6 @@ def generate_edge_maps(transform, edges):
 
 
 def unique_acyclic_permutations(edges, edge_t, printing=False, done=[]):
-    print(done)
     for d, e in zip(done, edges):
         if e[0] == 0 and not d:
             return 0
@@ -71,7 +70,6 @@ def unique_acyclic_permutations(edges, edge_t, printing=False, done=[]):
         for p in edge_t:
             o2 = "".join(["1" if j == done[i] else "0" for i, j in p])
             if o2 > o:
-                print("-",o)
                 return 0
         if printing:
             print(o)
@@ -118,7 +116,6 @@ def calculate_term(dim, printing=False):
             if i not in edges:
                 edges.append(i)
     edges.sort()
-    print(edges)
 
     # generate the hyperoctahedral group
     transforms = generate_hyperoctahedral_group(dim, edges)
