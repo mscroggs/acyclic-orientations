@@ -120,7 +120,7 @@ def calculate_term(n, printing=False):
 with open("b3343--.txt", "w") as f:
     pass
 
-for n in range(5):
+for n in range(10):
     a_n = calculate_term(n, True==0)
     with open("b3343--.txt", "a") as f:
         f.write(str(n) + " " + str(a_n) + "\n")
