@@ -81,35 +81,33 @@ def unique_acyclic_permutations(topology, edge_t, transform, printing=False, don
             if o2 == o:
                 testable_orients.append((t,p))
         edges_to_orient = []
-        for d, entities in topology.items():
-            if d > 1:
-                for e in entities:
-                    assert len(e) == 4  # If not, dim > 3; not implemented yet
-                    edges = {}
-                    for i in [(0,1), (0,2), (1,3), (2,3)]:
-                        a, b = min(e[i[0]], e[i[1]]), max(e[i[0]], e[i[1]])
-                        c = done[topology[1].index((a,b))]
-                        edges[(a,b)] = c
-                        edges[(b,a)] = not c
-                    starts = []
-                    for v in e:
-                        for v2 in e:
-                            if (v,v2) in edges and not edges[(v,v2)]:
-                                break
-                        else:
-                            starts.append(v)
-                    for a in starts:
-                        for b in starts:
-                            if a < b:
-                                edges_to_orient.append((a,b))
+        for d in range(2,len(topology)-1):
+            entities = topology[d]
+            for e in topology[d]:
+                assert len(e) == 4  # If not, dim > 3; not implemented yet
+                edges = {}
+                for i in [(0,1), (0,2), (1,3), (2,3)]:
+                    a, b = min(e[i[0]], e[i[1]]), max(e[i[0]], e[i[1]])
+                    c = done[topology[1].index((a,b))]
+                    edges[(a,b)] = c
+                    edges[(b,a)] = not c
+                starts = []
+                for v in e:
+                    for v2 in e:
+                        if (v,v2) in edges and not edges[(v,v2)]:
+                            break
+                    else:
+                        starts.append(v)
+                for a in starts:
+                    for b in starts:
+                        if a < b:
+                            edges_to_orient.append((a,b))
         out = 0
         for orients in product([True, False], repeat=len(edges_to_orient)):
             if not has_cycles(topology[1] + edges_to_orient, done + list(orients)):
                 o = "".join(["1" if i else "0" for i in done+list(orients)])
                 for t,p in testable_orients:
                     o2 = "".join(["1" if j == done[i] else "0" for i, j in p])
-                    print(topology)
-                    print(t, edges_to_orient)
                     for e in [tuple(t[i] for i in j) for j in edges_to_orient]:
                         if e[0] < e[1]:
                             if orients[edges_to_orient.index(e)]:
@@ -140,27 +138,18 @@ def unique_acyclic_permutations(topology, edge_t, transform, printing=False, don
 
 def calculate_term(dim, printing=False):
     # generate the edges of a dim-dimensional cube
-    topology = {}
     if dim <= 1:
         return 1
-    if dim > 1:
-        edges = [(0, 1)]
-        for d in range(1, dim):
-            e = [i for i in edges]
-            e2 = [tuple(j + 2**d for j in i) for i in edges]
-            e3 = [(i, i+2**d) for i in range(2**d)]
-            edges = e + e2 + e3
-        topology[1] = edges
-    if dim > 2:
-        faces = [(0,1,2,3)]
-        for d in range(2, dim):
-            f = [i for i in faces]
-            f2 = [tuple(j + 2**d for j in i) for i in faces]
-            f3 = [(i, j, i+2**d, j+2**d) for i, j in [(0,1), (0,2), (1,3), (2,3)]]
-            faces = f + f2 + f3
-        topology[2] = faces
-    if dim > 3:
-        raise NotImplementedError
+    topology = {}
+    for d in range(dim+1):
+        for n in range(d-1,-1,-1):
+            new_n = [i for i in topology[n]]
+            new_n += [tuple(j+2**(d-1) for j in i) for i in topology[n]]
+            if n > 0:
+                for e in topology[n-1]:
+                    new_n.append(tuple(list(e) + [i+2**(d-1) for i in e]))
+            topology[n] = new_n
+        topology[d] = [tuple(range(2**d))]
 
     # generate the hyperoctahedral group
     transforms = generate_hyperoctahedral_group(dim, topology[1])
@@ -183,11 +172,11 @@ print("Testing calculate_term(2)")
 print("PASS")
 # End testing
 
-with open("new_seq.txt", "w") as f:
+with open("bnew_seq.txt", "w") as f:
     pass
 
 for n in range(5):
     a_n = calculate_term(n, True)
-    with open("new_seq.txt", "a") as f:
+    with open("bnew_seq.txt", "a") as f:
         f.write(str(n) + " " + str(a_n) + "\n")
     print(n, a_n)
