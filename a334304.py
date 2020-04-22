@@ -1,5 +1,4 @@
-from itertools import product
-
+from itertools import combinations
 
 def has_cycles(edges, orient):
     vertices = 0
@@ -59,21 +58,20 @@ def generate_edge_maps(transform, edges):
 
 
 def unique_acyclic_permutations(edges, edge_t, printing=False, done=[]):
-    if len(done) > 0:
-        if not done[0]:
-            # If done starts False, then it can be made larger by
-            # reflecting so it starts True
+    print(done)
+    for d, e in zip(done, edges):
+        if e[0] == 0 and not d:
             return 0
-    if len(done) > 2:
-        if done[0] and done[1] and not done[2]:
-            # If done starts True True False, it can be made larger by
-            # reflecting so it starts True True True
-            return 0
+            # Edges from 0 at the start of the list must be oriented True
+            # as otherwise a larger number can be found by rotating
+        if e[0] != 0:
+            break
     if len(done) == len(edges):
         o = "".join(["1" if i else "0" for i in done])
         for p in edge_t:
             o2 = "".join(["1" if j == done[i] else "0" for i, j in p])
             if o2 > o:
+                print("-",o)
                 return 0
         if printing:
             print(o)
@@ -98,6 +96,30 @@ def calculate_term(dim, printing=False):
         e3 = [(i, i+2**d) for i in range(2**d)]
         edges = e + e2 + e3
 
+
+def calculate_term(dim, printing=False):
+    # generate the edges of a dim-dimensional cube
+    if dim <= 1:
+        return 1
+    topology = {}
+    for d in range(dim+1):
+        for n in range(d-1,-1,-1):
+            new_n = [i for i in topology[n]]
+            new_n += [tuple(j+2**(d-1) for j in i) for i in topology[n]]
+            if n > 0:
+                for e in topology[n-1]:
+                    new_n.append(tuple(list(e) + [i+2**(d-1) for i in e]))
+            topology[n] = new_n
+        topology[d] = [tuple(range(2**d))]
+
+    edges = []
+    for e in topology[dim-1]:
+        for i in combinations(e, 2):
+            if i not in edges:
+                edges.append(i)
+    edges.sort()
+    print(edges)
+
     # generate the hyperoctahedral group
     transforms = generate_hyperoctahedral_group(dim, edges)
     edge_transforms = generate_edge_maps(transforms, edges)
@@ -107,7 +129,7 @@ def calculate_term(dim, printing=False):
 
 # Test the code
 print("Testing calculate_term(1)")
-assert calculate_term(1, True) == 1
+assert calculate_term(1) == 1
 print("PASS")
 
 print("Testing calculate_term(2)")
@@ -115,15 +137,15 @@ assert calculate_term(2) == 3
 print("PASS")
 
 print("Testing calculate_term(3)")
-assert calculate_term(3) == 54
+#assert calculate_term(3) == 94
 print("PASS")
 # End testing
 
-with open("b334248.txt", "w") as f:
+with open("b334304.txt", "w") as f:
     pass
 
 for n in range(5):
     a_n = calculate_term(n, True)
-    with open("b334248.txt", "a") as f:
+    with open("b334304.txt", "a") as f:
         f.write(str(n) + " " + str(a_n) + "\n")
     print(n, a_n)
