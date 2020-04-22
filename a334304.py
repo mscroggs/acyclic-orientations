@@ -85,18 +85,6 @@ def unique_acyclic_permutations(edges, edge_t, printing=False, done=[]):
 
 def calculate_term(dim, printing=False):
     # generate the edges of a dim-dimensional cube
-    edges = []
-    if dim >= 1:
-        edges = [(0, 1)]
-    for d in range(1, dim):
-        e = [i for i in edges]
-        e2 = [tuple(j + 2**d for j in i) for i in edges]
-        e3 = [(i, i+2**d) for i in range(2**d)]
-        edges = e + e2 + e3
-
-
-def calculate_term(dim, printing=False):
-    # generate the edges of a dim-dimensional cube
     if dim <= 1:
         return 1
     topology = {}
